@@ -21,7 +21,7 @@ def main():
             continue
 
         detections = detector.detect(frame)
-        spatial_data = spatial.analyze(detections)
+        spatial_data = spatial.analyze(detections, frame)
         risk_result = risk_engine.evaluate(spatial_data)
 
         if risk_result["speak"]:
