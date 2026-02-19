@@ -11,8 +11,9 @@ class RiskEngine:
         current_time = time.time()
 
         for obj in spatial_data:
-            if obj["object"] == "person":
-                message = "Person detected"
+            if obj["object"] == "person" and obj["distance"] == "near":
+                message = "Person very close"
+
 
                 if (message != self.last_message) or \
                    (current_time - self.last_time_spoken > self.cooldown):
