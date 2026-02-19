@@ -1,37 +1,42 @@
 import cv2
-from detector import Detector
+from detector import detect
 from spatial import SpatialAnalyzer
 from risk_engine import RiskEngine
-from audio import AudioSystem
 
 def main():
     print("Starting SoundVision V2...")
 
-    cap = cv2.VideoCapture(0)
-    print("Camera initialized")
+    # Load test image instead of webcam (Colab has no camera)
+    image_path = "test.jpg"   # Make sure you upload this file
+    frame = cv2.imread(image_path)
 
-    detector = Detector()
+    if frame is None:
+        print("ERROR: Could not load image. Upload test.jpg")
+        return
+
+    print("Image loaded successfully.")
+
+    # Run detection
+    print("Running YOLO detection...")
+    detections = detect(frame)
+    print("Detections:", detections)
+
+    # Spatial analysis
     spatial = SpatialAnalyzer()
+    print("Running spatial analysis...")
+    spatial_data = spatial.analyze(detections, frame)
+    print("Spatial data:", spatial_data)
+
+    # Risk evaluation
     risk_engine = RiskEngine()
-    audio = AudioSystem()
+    print("Evaluating risk...")
+    risk_result = risk_engine.evaluate(spatial_data)
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    print("\nFINAL RISK ANALYSIS:")
+    for obj in risk_result:
+        print(obj)
 
-        detections = detector.detect(frame)
-        spatial_data = spatial.analyze(detections, frame)
-        risk_result = risk_engine.evaluate(spatial_data)
-
-        print("RISK ANALYSIS:", risk_result)
-        audio.announce(risk_result)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
+    print("\nSoundVision V2 completed successfully.")
 
 if __name__ == "__main__":
     main()
