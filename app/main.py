@@ -15,7 +15,7 @@ def main():
     risk_engine = RiskEngine()
     audio = AudioOutput()
 
-    while True:
+    for _ in range(1): 
         frame = camera.get_frame()
         if frame is None:
             continue
