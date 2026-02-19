@@ -1,34 +1,81 @@
-import time
-
-
 class RiskEngine:
     def __init__(self):
         print("Risk Engine initialized")
-        self.last_objects = set()
-        self.last_time_spoken = 0
-        self.cooldown = 5  # seconds
+
+        # Base object danger weights
+        self.object_weights = {
+            "person": 2,
+            "bicycle": 3,
+            "motorcycle": 5,
+            "car": 6,
+            "bus": 7,
+            "truck": 8,
+            "traffic light": 1,
+            "bench": 1,
+            "chair": 1
+        }
+
+        # Distance risk scaling
+        self.distance_weights = {
+            "near": 5,
+            "medium": 3,
+            "far": 1
+        }
+
+        self.cooldown_counter = 0
+        self.cooldown_limit = 10
+
 
     def evaluate(self, spatial_data):
-        current_time = time.time()
 
-        current_objects = set()
+        if not spatial_data:
+            return {"speak": False, "message": None}
+
+        scored_objects = []
 
         for obj in spatial_data:
-            if obj["object"] in ["person", "car", "bus", "truck"] and obj["distance"] == "near":
-                current_objects.add(obj["object"])
 
-        # Only speak if:
-        # 1. New dangerous object appears
-        # 2. Or cooldown expired AND object still present
+            object_type = obj.get("object")
+            distance = obj.get("distance")
 
-        if current_objects:
-            if current_objects != self.last_objects or \
-               (current_time - self.last_time_spoken > self.cooldown):
+            if object_type not in self.object_weights:
+                continue
 
-                self.last_objects = current_objects
-                self.last_time_spoken = current_time
+            if distance not in self.distance_weights:
+                continue
 
-                message = ", ".join(current_objects) + " nearby"
-                return {"speak": True, "message": message}
+            object_score = self.object_weights[object_type]
+            distance_score = self.distance_weights[distance]
 
-        return {"speak": False, "message": ""}
+            # CORE RISK FORMULA
+            risk_score = object_score * distance_score
+
+            scored_objects.append({
+                "object": object_type,
+                "distance": distance,
+                "risk_score": risk_score
+            })
+
+        if not scored_objects:
+            return {"speak": False, "message": None}
+
+        # Sort highest risk first
+        scored_objects.sort(key=lambda x: x["risk_score"], reverse=True)
+
+        highest_risk = scored_objects[0]
+
+        print("RISK ANALYSIS:", scored_objects)
+
+        # Cooldown control
+        if self.cooldown_counter < self.cooldown_limit:
+            self.cooldown_counter += 1
+            return {"speak": False, "message": None}
+
+        self.cooldown_counter = 0
+
+        message = f"Warning: {highest_risk['object']} {highest_risk['distance']}"
+
+        return {
+            "speak": True,
+            "message": message
+        }
