@@ -1,3 +1,4 @@
+import time
 from camera import Camera
 from detector import Detector
 from spatial import SpatialAnalyzer
@@ -26,7 +27,8 @@ def main():
         if risk_result["speak"]:
             audio.speak(risk_result["message"])
 
+        time.sleep(0.5)  # ← ADD THIS (2 alerts per second max)
+
 
 if __name__ == "__main__":
     main()
-
