@@ -1,8 +1,10 @@
+import cv2
+
 class Camera:
     def __init__(self):
         print("Camera initialized")
+        self.image_path = "test.jpg"
 
     def get_frame(self):
-        # Temporary placeholder
-        return "dummy_frame"
-      
+        frame = cv2.imread(self.image_path)
+        return frame
