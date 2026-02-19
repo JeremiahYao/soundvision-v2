@@ -5,18 +5,15 @@ class RiskEngine:
         print("Risk Engine initialized")
         self.last_message = None
         self.last_time_spoken = 0
-        self.cooldown = 3  # seconds
+        self.cooldown = 3
 
     def evaluate(self, spatial_data):
         current_time = time.time()
 
         for obj in spatial_data:
-            if obj["object"] == "person" and obj["distance"] == "near":
-                message = "Person ahead"
+            if obj["object"] == "person":
+                message = "Person detected"
 
-                # Only speak if:
-                # 1. Different message OR
-                # 2. Cooldown time passed
                 if (message != self.last_message) or \
                    (current_time - self.last_time_spoken > self.cooldown):
 
