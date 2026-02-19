@@ -1,25 +1,21 @@
-from ultralytics import YOLO
+def detect(self, frame):
+    results = self.model(frame, verbose=False)
 
+    detections = []
 
-class Detector:
-    def __init__(self):
-        print("Loading YOLO model...")
-        self.model = YOLO("yolov8n.pt")  # nano version (fastest)
-        print("YOLO loaded.")
+    for r in results:
+        for box in r.boxes:
+            cls_id = int(box.cls[0])
+            label = self.model.names[cls_id]
+            confidence = float(box.conf[0])
 
-    def detect(self, frame):
-        results = self.model(frame, verbose=False)
+            x1, y1, x2, y2 = box.xyxy[0]
+            box_area = (x2 - x1) * (y2 - y1)
 
-        detections = []
+            detections.append({
+                "object": label,
+                "confidence": confidence,
+                "box_area": float(box_area)
+            })
 
-        for r in results:
-            for box in r.boxes:
-                cls_id = int(box.cls[0])
-                label = self.model.names[cls_id]
-
-                detections.append({
-                    "object": label,
-                    "confidence": float(box.conf[0]),
-                })
-
-        return detections
+    return detections
