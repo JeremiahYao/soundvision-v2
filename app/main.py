@@ -9,7 +9,7 @@ def main():
     print("Starting SoundVision V2 Video Mode...")
 
     # ===== VIDEO INPUT =====
-    video_path = "/content/drive/MyDrive/demo_video.mp4"
+    video_path = "demo_video.mp4"
     cap = cv2.VideoCapture(video_path)
 
     if not cap.isOpened():
