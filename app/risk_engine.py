@@ -1,38 +1,43 @@
 class RiskEngine:
+
     def __init__(self):
         print("Risk Engine initialized")
 
     def evaluate(self, spatial_data):
-        risk_results = []
 
-        base_risk = {
-            "person": 2,
-            "car": 6,
-            "truck": 8,
-            "motorcycle": 7,
-            "bicycle": 4
-        }
+        if not spatial_data:
+            return None
+
+        risk_list = []
 
         for obj in spatial_data:
-            object_type = obj["object"]
-            distance = obj["distance"]
 
-            risk_score = base_risk.get(object_type, 1)
+            base_risk = {
+                "person": 2,
+                "car": 6,
+                "truck": 8,
+                "bus": 8,
+                "motorbike": 7,
+                "bicycle": 5
+            }.get(obj["object"], 1)
 
-            # Increase risk if closer
-            if distance == "near":
-                risk_score *= 3
-            elif distance == "medium":
-                risk_score *= 2
+            distance_multiplier = {
+                "near": 3,
+                "medium": 2,
+                "far": 1
+            }.get(obj["distance"], 1)
 
-            risk_results.append({
-                "object": object_type,
-                "distance": distance,
+            risk_score = base_risk * distance_multiplier
+
+            risk_list.append({
+                "object": obj["object"],
+                "distance": obj["distance"],
                 "direction": obj["direction"],
                 "risk_score": risk_score
             })
 
-        # Sort by highest risk
-        risk_results = sorted(risk_results, key=lambda x: x["risk_score"], reverse=True)
+        # Sort highest risk first
+        risk_list.sort(key=lambda x: x["risk_score"], reverse=True)
 
-        return risk_results
+        # Return ONLY the highest risk
+        return risk_list[0]
