@@ -1,5 +1,5 @@
 import cv2
-from detector import detect
+from detector import Detector
 from spatial import SpatialAnalyzer
 from risk_engine import RiskEngine
 
