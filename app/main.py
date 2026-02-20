@@ -5,59 +5,90 @@ from risk_engine import RiskEngine
 from guidance import GuidanceSystem
 
 def main():
-    print("Starting SoundVision V2...")
 
-    # =========================
-    # Load test image (Colab mode)
-    # =========================
-    image_path = "test.jpg"
-    frame = cv2.imread(image_path)
+    print("Starting SoundVision V2 Video Mode...")
 
-    if frame is None:
-        print("ERROR: Could not load image. Upload test.jpg")
+    # ===== VIDEO INPUT =====
+    video_path = "input.mp4"   # CHANGE this to your filename
+    cap = cv2.VideoCapture(video_path)
+
+    if not cap.isOpened():
+        print("Error: Could not open video.")
         return
 
-    print("Image loaded successfully.")
+    # ===== VIDEO OUTPUT =====
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(
+        'output_demo.mp4',
+        fourcc,
+        20.0,
+        (int(cap.get(3)), int(cap.get(4)))
+    )
 
-    # =========================
-    # Initialize systems
-    # =========================
+    # ===== INITIALISE SYSTEM =====
     detector = Detector()
     spatial = SpatialAnalyzer()
     risk_engine = RiskEngine()
-    guidance = GuidanceSystem()
-    
-    print("Running YOLO detection...")
-    detections = detector.detect(frame)
+    guidance_system = GuidanceSystem()
 
-    print("Running spatial analysis...")
-    spatial_data = spatial.analyze(detections, frame)
+    print("System initialised. Processing video...")
 
-    print("Evaluating prioritised risk...")
-    prioritised_risks = risk_engine.evaluate(spatial_data)
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-    print("\n--- PRIORITISED DECISION ---")
+        # Detection
+        detections = detector.detect(frame)
 
-    if not prioritised_risks:
-        print("No threats detected.")
-        return
+        # Spatial
+        spatial_data = spatial.analyze(detections, frame)
 
-    # ✅ FIX: get highest priority object
-    top_risk = prioritised_risks[0]
+        # Risk
+        prioritised_risk = risk_engine.evaluate(spatial_data)
 
-    print("Top Risk:", top_risk)
+        if prioritised_risk:
+            top = prioritised_risk
+            guidance = guidance_system.generate(top)
 
-    obj = top_risk["object"]
-    distance = top_risk["distance"]
-    direction = top_risk["direction"]
-    score = top_risk["risk_score"]
+            # Overlay text
+            cv2.putText(frame,
+                        f"Top Risk: {top['object']} {top['distance']} {top['direction']}",
+                        (20, 40),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.8,
+                        (0, 0, 255),
+                        2)
 
-    print(f"ALERT: Warning: {obj} {distance} {direction}")
-    print("SoundVision V2 completed successfully.")
+            cv2.putText(frame,
+                        f"GUIDANCE: {guidance}",
+                        (20, 80),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.7,
+                        (0, 255, 255),
+                        2)
 
-    instruction = guidance.generate(top_risk)
+        # Draw bounding boxes
+        for obj in detections:
+            x1, y1, x2, y2 = obj["bbox"]
+            label = obj["object"]
 
-    print("GUIDANCE:", instruction)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0,255,0), 2)
+            cv2.putText(frame,
+                        label,
+                        (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0,255,0),
+                        2)
+
+        out.write(frame)
+
+    cap.release()
+    out.release()
+
+    print("Video processing complete.")
+    print("Saved as output_demo.mp4")
 
 if __name__ == "__main__":
     main()
