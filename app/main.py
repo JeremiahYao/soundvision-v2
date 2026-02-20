@@ -2,7 +2,7 @@ import cv2
 from detector import Detector
 from spatial import SpatialAnalyzer
 from risk_engine import RiskEngine
-
+from guidance import GuidanceSystem
 
 def main():
     print("Starting SoundVision V2...")
@@ -25,7 +25,8 @@ def main():
     detector = Detector()
     spatial = SpatialAnalyzer()
     risk_engine = RiskEngine()
-
+    guidance = GuidanceSystem()
+    
     print("Running YOLO detection...")
     detections = detector.detect(frame)
 
@@ -54,6 +55,9 @@ def main():
     print(f"ALERT: Warning: {obj} {distance} {direction}")
     print("SoundVision V2 completed successfully.")
 
+    instruction = guidance.generate(top_risk)
+
+    print("GUIDANCE:", instruction)
 
 if __name__ == "__main__":
     main()
