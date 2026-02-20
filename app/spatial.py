@@ -3,29 +3,37 @@ class SpatialAnalyzer:
         print("Spatial Analyzer initialized")
 
     def analyze(self, detections, frame):
-        analyzed = []
-        frame_height, frame_width, _ = frame.shape
+        height, width, _ = frame.shape
+        spatial_data = []
 
-        for det in detections:
-            x1, y1, x2, y2 = det["bbox"]
-            box_height = y2 - y1
-            box_area = (x2 - x1) * (y2 - y1)
+        for obj in detections:
+            x1, y1, x2, y2 = obj["bbox"]
 
-            # Relative height ratio
-            height_ratio = box_height / frame_height
+            # --- Distance Estimation (area-based) ---
+            area = (x2 - x1) * (y2 - y1)
 
-            # Distance estimation based on bbox height
-            if height_ratio > 0.5:
+            if area > 5000:
                 distance = "near"
-            elif height_ratio > 0.25:
+            elif area > 1500:
                 distance = "medium"
             else:
                 distance = "far"
 
-            analyzed.append({
-                "object": det["object"],
+            # --- Direction Estimation ---
+            center_x = (x1 + x2) / 2
+
+            if center_x < width / 3:
+                direction = "left"
+            elif center_x < (2 * width / 3):
+                direction = "center"
+            else:
+                direction = "right"
+
+            spatial_data.append({
+                "object": obj["object"],
                 "distance": distance,
-                "area": box_area
+                "direction": direction,
+                "area": area
             })
 
-        return analyzed
+        return spatial_data
