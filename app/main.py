@@ -11,7 +11,16 @@ def main():
     # ===== VIDEO INPUT =====
     video_path = "/content/drive/MyDrive/demo_video.mp4"
     cap = cv2.VideoCapture(video_path)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter(
+        'output_demo.mp4',
+        fourcc,
+        20.0,
+        (width, height)
+    )
     if not cap.isOpened():
         print("Error: Could not open video.")
         return
