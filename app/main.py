@@ -3,10 +3,12 @@ from detector import Detector
 from spatial import SpatialAnalyzer
 from risk_engine import RiskEngine
 
+
 def main():
     print("Starting SoundVision V2...")
 
-    image_path = "test.jpg"
+    # ===== LOAD IMAGE (Colab Testing) =====
+    image_path = "test.jpg"  # Make sure you upload this file
     frame = cv2.imread(image_path)
 
     if frame is None:
@@ -15,30 +17,32 @@ def main():
 
     print("Image loaded successfully.")
 
-    # Initialize modules
+    # ===== INITIALISE MODULES =====
     detector = Detector()
     spatial = SpatialAnalyzer()
     risk_engine = RiskEngine()
 
-    # Run detection
+    # ===== PIPELINE =====
     print("Running YOLO detection...")
     detections = detector.detect(frame)
-    print("Detections:", detections)
 
-    # Spatial analysis
     print("Running spatial analysis...")
     spatial_data = spatial.analyze(detections, frame)
-    print("Spatial data:", spatial_data)
 
-    # Risk evaluation
-    print("Evaluating risk...")
-    risk_result = risk_engine.evaluate(spatial_data)
+    print("Evaluating prioritised risk...")
+    risk_output = risk_engine.evaluate(spatial_data)
 
-    print("\nFINAL RISK ANALYSIS:")
-    for obj in risk_result:
-        print(obj)
+    # ===== FINAL DECISION OUTPUT =====
+    print("\n--- PRIORITISED DECISION ---")
+    print("Top Risk:", risk_output["top_risk"])
+
+    if risk_output["alert"]:
+        print("ALERT:", risk_output["message"])
+    else:
+        print("STATUS:", risk_output["message"])
 
     print("\nSoundVision V2 completed successfully.")
+
 
 if __name__ == "__main__":
     main()
