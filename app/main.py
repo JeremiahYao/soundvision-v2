@@ -7,8 +7,8 @@ from risk_engine import RiskEngine
 def main():
     print("Starting SoundVision V2...")
 
-    # ===== LOAD IMAGE (Colab Testing) =====
-    image_path = "test.jpg"  # Make sure you upload this file
+    # Load test image (for Colab)
+    image_path = "test.jpg"
     frame = cv2.imread(image_path)
 
     if frame is None:
@@ -17,12 +17,11 @@ def main():
 
     print("Image loaded successfully.")
 
-    # ===== INITIALISE MODULES =====
+    # Initialize modules
     detector = Detector()
     spatial = SpatialAnalyzer()
     risk_engine = RiskEngine()
 
-    # ===== PIPELINE =====
     print("Running YOLO detection...")
     detections = detector.detect(frame)
 
@@ -30,18 +29,22 @@ def main():
     spatial_data = spatial.analyze(detections, frame)
 
     print("Evaluating prioritised risk...")
-    risk_output = risk_engine.evaluate(spatial_data)
+    prioritised_risk = risk_engine.evaluate(spatial_data)
 
-    # ===== FINAL DECISION OUTPUT =====
     print("\n--- PRIORITISED DECISION ---")
-    print("Top Risk:", risk_output["top_risk"])
 
-    if risk_output["alert"]:
-        print("ALERT:", risk_output["message"])
+    if prioritised_risk:
+        print("Top Risk:", prioritised_risk)
+
+        direction = prioritised_risk["direction"]
+        obj = prioritised_risk["object"]
+        distance = prioritised_risk["distance"]
+
+        print(f"ALERT: Warning: {obj} {distance} on your {direction}")
     else:
-        print("STATUS:", risk_output["message"])
+        print("No significant threats detected.")
 
-    print("\nSoundVision V2 completed successfully.")
+    print("SoundVision V2 completed successfully.")
 
 
 if __name__ == "__main__":
