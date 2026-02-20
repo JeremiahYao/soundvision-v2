@@ -7,7 +7,9 @@ from risk_engine import RiskEngine
 def main():
     print("Starting SoundVision V2...")
 
-    # Load test image (for Colab)
+    # =========================
+    # Load test image (Colab mode)
+    # =========================
     image_path = "test.jpg"
     frame = cv2.imread(image_path)
 
@@ -17,7 +19,9 @@ def main():
 
     print("Image loaded successfully.")
 
-    # Initialize modules
+    # =========================
+    # Initialize systems
+    # =========================
     detector = Detector()
     spatial = SpatialAnalyzer()
     risk_engine = RiskEngine()
@@ -29,21 +33,25 @@ def main():
     spatial_data = spatial.analyze(detections, frame)
 
     print("Evaluating prioritised risk...")
-    prioritised_risk = risk_engine.evaluate(spatial_data)
+    prioritised_risks = risk_engine.evaluate(spatial_data)
 
     print("\n--- PRIORITISED DECISION ---")
 
-    if prioritised_risk:
-        print("Top Risk:", prioritised_risk)
+    if not prioritised_risks:
+        print("No threats detected.")
+        return
 
-        direction = prioritised_risk["direction"]
-        obj = prioritised_risk["object"]
-        distance = prioritised_risk["distance"]
+    # ✅ FIX: get highest priority object
+    top_risk = prioritised_risks[0]
 
-        print(f"ALERT: Warning: {obj} {distance} on your {direction}")
-    else:
-        print("No significant threats detected.")
+    print("Top Risk:", top_risk)
 
+    obj = top_risk["object"]
+    distance = top_risk["distance"]
+    direction = top_risk["direction"]
+    score = top_risk["risk_score"]
+
+    print(f"ALERT: Warning: {obj} {distance} {direction}")
     print("SoundVision V2 completed successfully.")
 
 
